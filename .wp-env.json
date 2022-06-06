@@ -1,0 +1,15 @@
+{
+    "core": "WordPress/WordPress#6.0",
+    "plugins":[
+        ".",
+        "../LinePay/WooCommerce_LinePay-0.8.1",
+        "https://downloads.wordpress.org/plugin/woocommerce.6.1.0-rc.2.zip"
+    ],
+    "mappings": {
+        "wp-content/plugins/WooCommerce_Invoice": "../ECPay/WooCommerce_Invoice/Source",
+        "wp-content/plugins/WooCommerce_Payment": "../ECPay/WooCommerce_Payment/Source"
+    },
+    "port": 9527,
+    "testsPort": 9528,
+    "phpVersion": "7.4"
+}

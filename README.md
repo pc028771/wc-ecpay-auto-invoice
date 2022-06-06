@@ -1,2 +1,2 @@
-# wc-ecpay-invoice-adaptor
-WooCommerce auto invoice adaptor for ECPay
+# Auto invoice plugin for ECPay WooCommerce Invoice
+
