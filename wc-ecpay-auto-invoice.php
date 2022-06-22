@@ -3,11 +3,11 @@
 /**
  * Plugin Name:       WooCommerce ECPay Auto Invoice
  * Plugin URI:        https://example.com/plugins/the-basics/
- * Description:       Auto issue invoice after woocommerce order is completed
+ * Description:       Auto issue ECPay invoice after LinePay payment complete
  * Version:           1.0.0
  * Requires at least: 5.2
  * Requires PHP:      7.2
- * Author:            Howard Yang
+ * Author:            Novize
  * License:           GPL v2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       wc-ecpay-auto-invoice
@@ -35,8 +35,16 @@ class WC_ECPay_Auto_Invoice {
 					'novize/v1',
 					'/debug/(?P<id>\d+)',
 					array(
-						'methods'  => 'GET',
-						'callback' => array( $this, 'debug' ),
+						'methods'             => 'GET',
+						'callback'            => array( $this, 'debug' ),
+						'args'                => array(
+							'id' => array(
+								'validate_callback' => 'is_numeric',
+							),
+						),
+						'permission_callback' => function () {
+							return current_user_can( 'administrator' );
+						},
 					)
 				);
 			}
@@ -44,28 +52,22 @@ class WC_ECPay_Auto_Invoice {
 	}
 
 	public function debug( WP_REST_Request $request ) {
-		global $ecpi;
-
-		$id = $request->get_param( 'id' );
-		if ( ! is_numeric( $id ) ) {
-			return WP_Error( 'invalid_id', 'Invalid id', array( 'status' => 400 ) );
-		}
-
-		$order = new WC_Order( $id );
-
-		// $ecpi->ecpay_auto_invoice( 1, true );
-		return $order->get_data();
 	}
 
-	public function woocommerce_payment_complete( $order_id ) {
+	public function woocommerce_payment_complete( $id ) {
 		global $ecpi;
 
-		$linepay_payment_status = get_post_meta( $order_id, '_linepay_payment_status', true );
-		if ( WC_Gateway_LINEPay_Const::PAYMENT_STATUS_CONFIRMED !== $linepay_payment_status ) {
+		$linepay_payment_status = get_post_meta( $id, '_linepay_payment_status', true );
+		if ( empty( $linepay_payment_status ) ) {
 			return;
 		}
 
-		$ecpi->gen_invoice( $order_id, 'auto' );
+		$order = new WC_Order( $id );
+		if ( ! $order->get_id() ) {
+			return;
+		}
+
+		$ecpi->gen_invoice( $id, 'auto' );
 	}
 
 	/**
@@ -77,11 +79,7 @@ class WC_ECPay_Auto_Invoice {
 			return false;
 		}
 
-		// if ( ! is_plugin_active( 'WooCommerce_Payment/integration_plugin.php' ) ) {
-		// 	return $this->deactivate_self_and_warning( '請先安裝及啟用 ECPay Payment for WooCommerce 外掛.' );
-		// }
-
-		if ( ! is_plugin_active( 'WooCommerce_Invoice/woocommerce-ecpayinvoice.php' ) ) {
+		if ( ! is_plugin_active( 'ecpay_invoice/woocommerce-ecpayinvoice.php' ) ) {
 			return $this->deactivate_self_and_warning( '請先安裝及啟用 ECPay Invoice for WooCommerce 外掛.' );
 		}
 
