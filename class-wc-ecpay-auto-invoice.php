@@ -65,11 +65,13 @@ class WC_ECPay_Auto_Invoice {
 			return false;
 		}
 
-		if ( ! is_plugin_active( 'ecpay_invoice/woocommerce-ecpayinvoice.php' ) ) {
+		$ecpay_invoice = glob( WP_PLUGIN_DIR . '/*/woocommerce-ecpayinvoice.php' );
+		if ( empty( $ecpay_invoice ) || ! is_plugin_active( str_replace( WP_PLUGIN_DIR . '/', '', $ecpay_invoice[0] ) ) ) {
 			return $this->deactivate_self_and_warning( '請先安裝及啟用 ECPay Invoice for WooCommerce 外掛.' );
 		}
 
-		if ( ! is_plugin_active( 'WooCommerce_LinePay-0.8.1/gateway-linepay.php' ) ) {
+		$linepay = glob( WP_PLUGIN_DIR . '/*/gateway-linepay.php' );
+		if ( empty( $linepay ) || ! is_plugin_active( str_replace( WP_PLUGIN_DIR . '/', '', $linepay[0] ) ) ) {
 			return $this->deactivate_self_and_warning( '請先安裝及啟用 WooCommerce LINEPay Gateway 外掛.' );
 		}
 	}

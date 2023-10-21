@@ -14,6 +14,6 @@
  * Domain Path:       /languages
  */
 
-require_once './class-wc-ecpay-auto-invoice.php';
+require_once 'class-wc-ecpay-auto-invoice.php';
 
 $wc_ecpay_auto_invoice = WC_ECPay_Auto_Invoice::get_instance();
