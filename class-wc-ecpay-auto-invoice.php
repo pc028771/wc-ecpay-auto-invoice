@@ -13,7 +13,7 @@ class WC_ECPay_Auto_Invoice {
 
 	public function __construct() {
 		add_action( 'admin_init', array( $this, 'ecpay_linepay_dependency_check' ) );
-		add_action( 'woocommerce_payment_complete', array( $this, 'woocommerce_payment_complete' ) );
+		add_action( 'updated_postmeta', 'updated_postmeta', 10, 4 );
 		add_action(
 			'rest_api_init',
 			function () {
@@ -40,6 +40,24 @@ class WC_ECPay_Auto_Invoice {
 	public function debug( WP_REST_Request $request ) {
 	}
 
+	public function updated_postmeta( $meta_id, $object_id, $meta_key, $meta_value ) {
+		global $ecpi;
+
+		if (
+			'enable' === WC_Admin_Settings::get_option( 'wc_linepay_issue_ecpay_invoice', 'disable' )
+			&& '_linepay_payment_status' === $meta_key
+			&& WC_Gateway_LINEPay_Const::PAYMENT_STATUS_CONFIRMED === $meta_value
+		) {
+			$order = new WC_Order( $object_id );
+			if ( ! $order->get_id() ) {
+				return;
+			}
+
+			$ecpi->gen_invoice( $object_id, 'auto' );
+		}
+	}
+
+	/** @deprecated */
 	public function woocommerce_payment_complete( $id ) {
 		global $ecpi;
 
